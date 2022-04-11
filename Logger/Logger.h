@@ -1,9 +1,14 @@
 #ifndef LOGGER
 #define LOGGER
 
+#include <iostream>
+#include <fstream>
 #include <string>
 #include <mutex>
 #include <chrono>
+#include <ctime>
+#include <format>
+#include <memory> 
 
 enum class LogLevel {
   INFO,
@@ -14,7 +19,7 @@ enum class LogLevel {
 
 class LoggerInterface {
 public:
-  LoggerInterface(Logger& pLower, std::string name);
+  LoggerInterface(LoggerInterface& logInterface, std::string name);
   LoggerInterface(std::string fileName, std::string name);
   ~LoggerInterface();
   void info(std::string log);
@@ -23,13 +28,10 @@ public:
   void setLogLevel(LogLevel level);
 protected:
   std::string _name{""};
-  Logger* _pLogger{ nullptr };
+  std::shared_ptr<Logger> _pLogger{ nullptr };
 private:
-  std::string format(std::string log);
-
-  bool _isBase{false};
-  LogType _logLevel{LogLevel::NONE};
-  std::chrono::time_point<std::chrono::system_clock> time;
+  std::string format(std::string msg);
+  LogLevel _logLevel{LogLevel::NONE};
 };
 
 class Logger {
@@ -39,8 +41,8 @@ public:
   void log(std::string log);
 protected:
 private:
-  std::mutex _mutex{ nullptr };
-  std::string _fileName{ "text.log" };
+  std::mutex _mutex;
+  std::ofstream _fileStream;
 };
 
 #endif //LOGGER

@@ -2,48 +2,43 @@
 
 LoggerInterface::LoggerInterface(LoggerInterface& logInterface, std::string name) {
   _name = logInterface._name + name;
-  _isBase = false;
   _pLogger = logInterface._pLogger;
 }
 
 LoggerInterface::LoggerInterface(std::string fileName, std::string name) {
   _name = name;
-  _isBase = true;
-  _pLogger = new Logger(fileName);
+  _pLogger = std::make_shared<Logger>(fileName);
 }
 
 LoggerInterface::~LoggerInterface() {
-  if (_isBase) {
-    delete _pLogger;
-  }
+
 }
 
 void LoggerInterface::setLogLevel(LogLevel level) {
-  self._logLevel = level;
+  _logLevel = level;
 }
 
-void LoggerInterface::error(std::string log) {
-  if (self._logLevel != LogLevel::NONE) {
-    self.log(log);
+void LoggerInterface::error(std::string msg) {
+  if (_logLevel != LogLevel::NONE) {
+    _pLogger->log(format(msg));
   }
 }
 
-void LoggerInterface::debug(std::string log) {
-  if (self._logLevel != LogLevel::NONE
-    and self._logLevel != LogLevel::ERROR) {
-    self.log(log);
+void LoggerInterface::debug(std::string msg) {
+  if (_logLevel != LogLevel::NONE
+      && _logLevel != LogLevel::ERROR) {
+    _pLogger->log(format(msg));
   }
 }
 
-void LoggerInterface::info(std::string log) {
-  if (self._logLevel == LogLevel::INFO) {
-    self.log(log);
+void LoggerInterface::info(std::string msg) {
+  if (_logLevel == LogLevel::INFO) {
+    _pLogger->log(format(msg));
   }
 }
 
-std::string LoggerInterface::format(std::string log) {
-  time = std::chrono::system_clock::now();
-  return 
+std::string LoggerInterface::format(std::string msg) {
+  return "[" + _name + "]: " + msg;
 }
 
 void Logger::log(std::string log) {
@@ -51,4 +46,10 @@ void Logger::log(std::string log) {
   _fileStream << log;
 }
 
+Logger::Logger(std::string fileName) {
+  _fileStream.open(fileName);
+}
 
+Logger::~Logger() {
+  _fileStream.close();
+}
